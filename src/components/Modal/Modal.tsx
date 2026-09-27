@@ -9,34 +9,34 @@ interface ModalProps {
 
 export default function Modal({ children, onClose }: ModalProps) {
   useEffect(() => {
+    document.body.style.overflow = "hidden";
+
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
+      if (e.code === "Escape") onClose();
     };
     window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
+
+    return () => {
+      document.body.style.overflow = "";
+      window.removeEventListener("keydown", handleKeyDown);
+    };
   }, [onClose]);
 
   const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (e.target === e.currentTarget) onClose();
+    if (e.currentTarget === e.target) {
+      onClose();
+    }
   };
-
-  const modalRoot = document.getElementById("modal-root");
-  if (!modalRoot) {
-    const div = document.createElement("div");
-    div.id = "modal-root";
-    document.body.appendChild(div);
-    return null;
-  }
 
   return createPortal(
     <div
       className={css.backdrop}
+      onClick={handleBackdropClick}
       role="dialog"
       aria-modal="true"
-      onClick={handleBackdropClick}
     >
       <div className={css.modal}>{children}</div>
     </div>,
-    document.getElementById("modal-root")!,
+    document.getElementById("modal-root") as HTMLElement,
   );
 }
